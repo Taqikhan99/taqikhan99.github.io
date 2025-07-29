@@ -1,0 +1,38 @@
+.clock-card {
+  background: #1b2735;
+  padding: 20px;
+  border-radius: 15px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.city {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.timezone {
+  color: #bbb;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+canvas {
+  background: transparent;
+}
+
+.digital {
+  font-size: 40px;
+  color: #61bdff;
+  margin-top: 10px;
+}
+
+.ampm {
+  font-size: 18px;
+}
+
+.date {
+  color: #bbb;
+  margin-top: 10px;
+}
