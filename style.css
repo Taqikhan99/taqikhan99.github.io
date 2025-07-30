@@ -1,10 +1,33 @@
-.clock-card {
-  background: #1b2735;
+body{
+  font-family: "Ubuntu", sans-serif !important;
+  font-weight: 300;
+  font-style: normal;
+}
+.mainClockCard,.clock-card {
+  background: #081625;
   padding: 20px;
-  border-radius: 15px;
-  width: 400px;
+  border-radius: 25px;
+  /* width: 400px; */
   text-align: center;
   box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  transition: all ease-in 0.5s;
+}
+
+.mainClockCard{
+  width: 600px;
+  height: 600px;
+}
+
+.clock-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 18px rgba(124, 123, 123, 0.4);
+  cursor: pointer;
+}
+
+.mainClockCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 18px rgba(124, 123, 123, 0.4);
+  cursor: pointer;
 }
 
 .city {
