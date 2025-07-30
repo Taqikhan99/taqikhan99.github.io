@@ -371,13 +371,6 @@ let dayOfWeek = date.toLocaleString("en-US", { weekday: "long", timeZone: userTi
 console.log(userTimeZoneArea, strTime,dayOfWeek)
 
 
-function createMainTimeZoneClock(){
-
-
-
-}
-
-
 const canvas = document.getElementById("analogClock");
 const ctx = canvas.getContext("2d");
 const radius = canvas.height / 2;
@@ -410,6 +403,60 @@ function drawClock() {
     document.getElementById("cityname").textContent=userTimeZoneArea.split('/')[1]
     document.getElementById("zonename").textContent=userTimeZoneArea
 }
+
+
+// for smaller clocks
+function createSmallClock(container, city, tz) {
+
+  console.log(city,tz)
+  const card = document.createElement("div");
+  card.className = "border p-2 clock-card  col-lg-3 col-10 mb-3 p-3";
+  // card.style.width = "200px";
+  card.style.background = "#081625";
+  card.style.borderRadius = "10px";
+  card.innerHTML = `
+    <h4 class="text-white text-center text-uppercase ">${city}</h4>
+    <p class="text-white text-center ">${tz}</p>
+    <p class="date text-center" id="fullDate" style="margin-top: -15px;"></p>
+    <canvas width="150" height="150"></canvas>
+    <p class="digital text-center mt-2">--:--:--</p>
+  `;
+  container.appendChild(card);
+
+  let canvas = card.querySelector("canvas");
+  let ctx = canvas.getContext("2d");
+  let radius = canvas.height / 2;
+  ctx.translate(radius, radius);
+
+  drawSmallClock(ctx,tz,radius,card)
+  setInterval(()=>drawSmallClock(ctx,tz,radius,card), 1000);
+
+}
+
+function drawSmallClock(ctx,tz,radius,card) {
+    // const now = new Date();
+    // const localTime = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+
+  let now = new Date();
+  let time = new Date(now.toLocaleString("en-US", { timeZone: tz }));
+// console.log("****************");
+
+ let options = { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true, tz };
+ let digital = time.toLocaleTimeString("en-US", options);
+
+card.querySelector("#fullDate").textContent= time.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+card.querySelector(".digital").textContent=digital
+
+  // console.log(tz,time,card)
+
+   drawFace(ctx, radius);
+  drawNumbers(ctx, radius);
+  drawTime(ctx, radius, time);
+    
+  }
+
+
+
 
 function drawFace(ctx, radius) {
   ctx.beginPath();
@@ -474,6 +521,20 @@ function drawHand(ctx, pos, length, width) {
   ctx.rotate(-pos);
 }
 
+const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+console.log("Country code: ",regionNames.of("PK")); // Pakistan
+
+
 setInterval(drawClock, 1000);
 drawClock();
+
+const container = document.getElementById("randomClocks");
+
+// ✅ Pick 5 random zones
+const randomZones = aryIanaTimeZones.sort(() => 0.5 - Math.random()).slice(0, 10);
+
+// ✅ Create small clocks
+randomZones.forEach(tz => createSmallClock(container, tz.split('/')[1], tz));
+
+randomZones.forEach(tz => console.log(tz));
 
