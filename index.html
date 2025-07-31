@@ -25,7 +25,7 @@
        
       </ul>
       <form class="d-flex">
-        <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+        <input class="form-control search-input px-4 me-2" type="search" placeholder="Search time zones..." id="searchZone" aria-label="Search">
         
       </form>
     </div>
@@ -33,6 +33,7 @@
   </div>
   
 </nav>
+<div id="searchResults" class="list-group"></div>
 
 <div id="mainClockArea" class="border mx-auto mt-5 p-3 mainClockCard" >
 
@@ -52,7 +53,7 @@
 <div class="text-center ">
   <h2 class="digital" id="digitalTime">--:--:--</h2>
   <div class="ampm" id="ampm"></div>
-  <h5 class="date" style="margin-top: -20px;" id="shortDate"></h5>
+  <h5 class="date" style="margin-top: -5px;" id="shortDate"></h5>
   </div>
 </div> 
 </div>
@@ -66,7 +67,8 @@
 </div>
 
 
-<script src="./script.js"></script>
+<!-- <script src="./script.js"></script> -->
+<script src="./script2.js"></script>
     
 </body>
 </html>
