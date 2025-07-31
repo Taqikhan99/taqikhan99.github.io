@@ -349,192 +349,297 @@ var aryIanaTimeZones = [
   'Africa/Johannesburg'
 ];
 
-let date = new Date;
- const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  console.log("Detected Time Zone:", userTimeZone);
-// aryIanaTimeZones.forEach((timeZone) =>
-// {
+class Clock {
+  constructor({ canvas, timeZone, digitalEl, dateEl, cityEl, zoneEl,sDateEl }) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.radius = canvas.height / 2;
+    this.ctx.translate(this.radius, this.radius);
 
- 
+    this.timeZone = timeZone;
+    this.digitalEl = digitalEl;
+    this.dateEl = dateEl;
+    this.cityEl = cityEl;
+    this.zoneEl = zoneEl;
+    this.sDateEl= sDateEl
 
-//   let strTime = date.toLocaleString("en-US", {timeZone: `${timeZone}`});
-//   console.log(timeZone, strTime);
-// });
+    this.timer=null
+    this.start();
+  }
 
+  start() {
+    this.draw();
+    this.timer=setInterval(() => this.draw(), 1000);
+  }
 
-var userTimeZoneArea = aryIanaTimeZones.find((tz)=> tz.toLowerCase()==userTimeZone.toLowerCase())
-
-console.log(userTimeZoneArea)
-let strTime = date.toLocaleString("en-US", {timeZone: `${userTimeZoneArea}`});
-  // ✅ Get day of the week
-let dayOfWeek = date.toLocaleString("en-US", { weekday: "long", timeZone: userTimeZoneArea });
-console.log(userTimeZoneArea, strTime,dayOfWeek)
-
-
-const canvas = document.getElementById("analogClock");
-const ctx = canvas.getContext("2d");
-const radius = canvas.height / 2;
-ctx.translate(radius, radius);
-
-function drawClock() {
-  let now = new Date();
-  let time = new Date(now.toLocaleString("en-US", { userTimeZoneArea }));
-
-  drawFace(ctx, radius);
-  drawNumbers(ctx, radius);
-  drawTime(ctx, radius, time);
-
-  // Digital clock
-  let options = { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true, userTimeZoneArea };
-  let digital = time.toLocaleTimeString("en-US", options);
-  document.getElementById("digitalTime").textContent = digital;
-
-  document.getElementById("ampm").textContent = digital.includes("AM") ? "AM" : "PM";
-
-  // Date
-  document.getElementById("fullDate").textContent =
-    time.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-
-  document.getElementById("shortDate").textContent =
-    time.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-
-    console.log("After split: ",userTimeZoneArea.split('/')[1])
-    //display zone and city name
-    document.getElementById("cityname").textContent=userTimeZoneArea.split('/')[1]
-    document.getElementById("zonename").textContent=userTimeZoneArea
-}
-
-
-// for smaller clocks
-function createSmallClock(container, city, tz) {
-
-  console.log(city,tz)
-  const card = document.createElement("div");
-  card.className = "border p-2 clock-card  col-lg-3 col-10 mb-3 p-3";
-  // card.style.width = "200px";
-  card.style.background = "#081625";
-  card.style.borderRadius = "10px";
-  card.innerHTML = `
-    <h4 class="text-white text-center text-uppercase ">${city}</h4>
-    <p class="text-white text-center ">${tz}</p>
-    <p class="date text-center" id="fullDate" style="margin-top: -15px;"></p>
-    <canvas width="150" height="150"></canvas>
-    <p class="digital text-center mt-2">--:--:--</p>
-  `;
-  container.appendChild(card);
-
-  let canvas = card.querySelector("canvas");
-  let ctx = canvas.getContext("2d");
-  let radius = canvas.height / 2;
-  ctx.translate(radius, radius);
-
-  drawSmallClock(ctx,tz,radius,card)
-  setInterval(()=>drawSmallClock(ctx,tz,radius,card), 1000);
-
-}
-
-function drawSmallClock(ctx,tz,radius,card) {
-    // const now = new Date();
-    // const localTime = new Date(now.toLocaleString("en-US", { timeZone: tz }));
-
-  let now = new Date();
-  let time = new Date(now.toLocaleString("en-US", { timeZone: tz }));
-// console.log("****************");
-
- let options = { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true, tz };
- let digital = time.toLocaleTimeString("en-US", options);
-
-card.querySelector("#fullDate").textContent= time.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-card.querySelector(".digital").textContent=digital
-
-  // console.log(tz,time,card)
-
-   drawFace(ctx, radius);
-  drawNumbers(ctx, radius);
-  drawTime(ctx, radius, time);
-    
+   stop() {
+    if (this.timer) clearInterval(this.timer);
   }
 
 
+  getTime() {
+    const now = new Date();
+    return new Date(now.toLocaleString("en-US", { timeZone: this.timeZone }));
+  }
+
+  draw() {
+    const time = this.getTime();
+
+    //reseting the canvas
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+  this.ctx.translate(this.radius, this.radius);
 
 
-function drawFace(ctx, radius) {
-  ctx.beginPath();
-  ctx.arc(0, 0, radius - 5, 0, 2 * Math.PI);
-  ctx.fillStyle = "#1b2735";
-  ctx.fill();
+    this.drawFace();
+    this.drawNumbers();
+    this.drawHands(time);
 
-  ctx.strokeStyle = "#333";
-  ctx.lineWidth = 4;
-  ctx.stroke();
+    // Update digital time
+    if (this.digitalEl) {
+      this.digitalEl.textContent = time.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+      });
+    }
 
-  ctx.beginPath();
-  ctx.arc(0, 0, 5, 0, 2 * Math.PI);
-  ctx.fillStyle = "#fff";
-  ctx.fill();
-}
+    // Update date
+    if (this.dateEl) {
+      this.dateEl.textContent = time.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric"
+      });
+    }
+    if (this.sDateEl) {
+      this.sDateEl.textContent = time.toLocaleDateString("en-US", {
+        weekday: "short", month: "short", day: "numeric" 
+      });
+    }
 
-function drawNumbers(ctx, radius) {
-  ctx.font = radius * 0.15 + "px arial";
-  ctx.textBaseline = "middle";
-  ctx.textAlign = "center";
-  for (let num = 1; num <= 12; num++) {
-    let ang = num * Math.PI / 6;
-    ctx.rotate(ang);
-    ctx.translate(0, -radius * 0.85);
-    ctx.rotate(-ang);
-    ctx.fillText(num.toString(), 0, 0);
-    ctx.rotate(ang);
-    ctx.translate(0, radius * 0.85);
-    ctx.rotate(-ang);
+    // Update city and timezone
+    if (this.cityEl) this.cityEl.textContent = this.timeZone.split("/")[1] || this.timeZone;
+    if (this.zoneEl) this.zoneEl.textContent = this.timeZone;
+  }
+
+  drawFace() {
+    const ctx = this.ctx;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius - 5, 0, 2 * Math.PI);
+    ctx.fillStyle = "#1b2735";
+    ctx.fill();
+
+    ctx.strokeStyle = "#333";
+    ctx.lineWidth = 4;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(0, 0, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+  }
+
+  drawNumbers() {
+    const ctx = this.ctx;
+    ctx.font = this.radius * 0.15 + "px Arial";
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+
+    for (let num = 1; num <= 12; num++) {
+      const ang = num * Math.PI / 6;
+      ctx.rotate(ang);
+      ctx.translate(0, -this.radius * 0.85);
+      ctx.rotate(-ang);
+      ctx.fillText(num.toString(), 0, 0);
+      ctx.rotate(ang);
+      ctx.translate(0, this.radius * 0.85);
+      ctx.rotate(-ang);
+    }
+  }
+
+  drawHands(time) {
+    const hour = time.getHours() % 12;
+    const minute = time.getMinutes();
+    const second = time.getSeconds();
+
+    // Hour hand
+    this.drawHand(
+      (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60)),
+      this.radius * 0.5,
+      6
+    );
+
+    // Minute hand
+    this.drawHand(
+      (minute * Math.PI / 30) + (second * Math.PI / (30 * 60)),
+      this.radius * 0.8,
+      4
+    );
+
+    // Second hand
+    this.drawHand(second * Math.PI / 30, this.radius * 0.9, 2);
+  }
+
+  drawHand(angle, length, width) {
+    const ctx = this.ctx;
+    ctx.beginPath();
+    ctx.lineWidth = width;
+    ctx.lineCap = "round";
+    ctx.moveTo(0, 0);
+    ctx.rotate(angle);
+    ctx.lineTo(0, -length);
+    ctx.strokeStyle = "#3fa9f5";
+    ctx.stroke();
+    ctx.rotate(-angle);
   }
 }
 
-function drawTime(ctx, radius, time) {
-  let hour = time.getHours();
-  let minute = time.getMinutes();
-  let second = time.getSeconds();
+// for small clocks
+// function createSmallClock(container, timeZone) {
+//   const city = timeZone.split("/")[1];
 
-  // Hour
-  hour = hour % 12;
-  hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
-  drawHand(ctx, hour, radius * 0.5, 6);
+//   const card = document.createElement("div");
+//   card.className = "clock-card p-5 mb-3 col-lg-3 col-10 border";
+//   card.style.background = "#081625";
+//   card.style.borderRadius = "10px";
 
-  // Minute
-  let minuteAngle = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
-  drawHand(ctx, minuteAngle, radius * 0.8, 4);
+//   card.innerHTML = `
+//     <h4 class="text-white text-center city"></h4>
+//     <p class="text-white text-center zone"></p>
+//     <p class="date text-center"></p>
+//     <canvas width="150" height="150"></canvas>
+//     <p class="digital text-center mt-2">--:--:--</p>
+//   `;
 
-  // Second
-  let secondAngle = second * Math.PI / 30;
-  drawHand(ctx, secondAngle, radius * 0.9, 2);
-}
+//   container.appendChild(card);
 
-function drawHand(ctx, pos, length, width) {
-  ctx.beginPath();
-  ctx.lineWidth = width;
-  ctx.lineCap = "round";
-  ctx.moveTo(0, 0);
-  ctx.rotate(pos);
-  ctx.lineTo(0, -length);
-  ctx.strokeStyle = "#3fa9f5";
-  ctx.stroke();
-  ctx.rotate(-pos);
-}
-
-const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
-console.log("Country code: ",regionNames.of("PK")); // Pakistan
+//   new Clock({
+//     canvas: card.querySelector("canvas"),
+//     timeZone,
+//     digitalEl: card.querySelector(".digital"),
+//     dateEl: card.querySelector(".date"),
+//     cityEl: card.querySelector(".city"),
+//     zoneEl: card.querySelector(".zone")
+//   });
+// }
 
 
-setInterval(drawClock, 1000);
-drawClock();
-
+//  Setup Area
 const container = document.getElementById("randomClocks");
+const mainClockCanvas = document.getElementById("analogClock");
+const digitalEl = document.getElementById("digitalTime");
+const dateEl = document.getElementById("fullDate");
+const cityEl = document.getElementById("cityname");
+const zoneEl = document.getElementById("zonename");
 
-// ✅ Pick 5 random zones
-const randomZones = aryIanaTimeZones.sort(() => 0.5 - Math.random()).slice(0, 10);
+let currentMainClock;
 
-// ✅ Create small clocks
-randomZones.forEach(tz => createSmallClock(container, tz.split('/')[1], tz));
+// ✅ Reusable function to create main clock
+function setupMainClock(timeZone) {
+  if (currentMainClock) clearInterval(currentMainClock.timer); // stop old clock
 
-randomZones.forEach(tz => console.log(tz));
+  currentMainClock = new Clock({
+    canvas: mainClockCanvas,
+    timeZone,
+    digitalEl,
+    dateEl,
+    cityEl,
+    zoneEl
+  });
 
+   history.pushState({ zone: timeZone }, "", `/time/${timeZone.split("/")[1] }`);
+
+  // ✅ 3. Update the <title> dynamically
+  document.title = `Current Time in ${timeZone}`;
+
+}
+
+// ✅ Function to populate small clocks
+function populateSmallClocks(excludeZone,filter) {
+  container.innerHTML = ""; // clear old clocks
+
+  // Get 10 random zones (excluding current main zone)
+
+  const zones = aryIanaTimeZones
+    .filter(z => z !== excludeZone)
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 10);
+  
+  zones.forEach(zone => {
+    const card = document.createElement("div");
+    card.className = "clock-card p-3 mb-3 col-lg-3 col-10 border";
+    card.style.background = "#081625";
+    card.style.borderRadius = "10px";
+
+    card.innerHTML = `
+      <h4 class="text-white text-center city"></h4>
+      <p class="text-white text-center zone"></p>
+      <p class="date text-center"></p>
+      <canvas width="150" height="150"></canvas>
+      <p class="digital text-center mt-2">--:--:--</p>
+    `;
+
+    container.appendChild(card);
+  
+    // Create the small clock
+    new Clock({
+      canvas: card.querySelector("canvas"),
+      timeZone: zone,
+      digitalEl: card.querySelector(".digital"),
+      dateEl: card.querySelector(".date"),
+      cityEl: card.querySelector(".city"),
+      zoneEl: card.querySelector(".zone")
+    });
+
+    // ✅ Add click event → Replace main clock + repopulate small clocks
+    card.addEventListener("click", () => {
+      setupMainClock(zone); // set this as main
+      populateSmallClocks(zone); // refresh small clocks
+    });
+  });
+
+}
+
+// ✅ Initial Setup
+const userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+setupMainClock(userTimeZone);
+populateSmallClocks(userTimeZone);
+
+const searchInput = document.getElementById("searchZone");
+const searchResults = document.getElementById("searchResults");
+
+searchInput.addEventListener("keydown", () => {
+
+  const query = searchInput.value.toLowerCase();
+  searchResults.innerHTML = "";
+   console.log(query);
+    
+  if (!query) return;
+
+  const matches = aryIanaTimeZones.filter(tz => tz.toLowerCase().includes(query)).slice(0, 10);
+
+  if(matches !=null){
+
+    // document.getElementById("mainClockArea").style.display="none"
+  matches.forEach(zone => {
+    const btn = document.createElement("button");
+    btn.className = "list-group-item list-group-item-action";
+    btn.textContent = zone;
+
+    console.log(zone)
+    populateSmallClocks(zone); 
+
+    btn.addEventListener("click", () => {
+      setupMainClock(zone);       // set as main clock
+       // repopulate small clocks
+      searchResults.innerHTML = ""; // clear results
+      searchInput.value = ""; // clear input
+    });
+
+    searchResults.appendChild(btn);
+  });
+}
+});
