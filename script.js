@@ -550,7 +550,7 @@ function setupMainClock(timeZone) {
     zoneEl
   });
 
-   history.pushState({ zone: timeZone }, "", `/time/${timeZone.split("/")[1] }`);
+//    history.pushState({ zone: timeZone }, "", `/time/${timeZone.split("/")[1] }`);
 
   // ✅ 3. Update the <title> dynamically
   document.title = `Current Time in ${timeZone}`;
