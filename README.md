@@ -1,1 +1,1 @@
-world clock website
+world clock website for all
